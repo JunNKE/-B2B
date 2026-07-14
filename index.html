@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企业合作 · B2B 合作意向登记</title>
+  <meta name="description" content="期待与您建立长期、互信的商业合作关系。请填写下方表单，我们会在 1-2 个工作日内与您联系。">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --error: #dc2626;
+      --error-light: #fee2e2;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --radius: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid var(--gray-200);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      color: var(--gray-500);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+      color: #fff;
+      padding: 64px 24px 56px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      opacity: 0.9;
+      max-width: 580px;
+      margin: 0 auto 8px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ===== Form Section ===== */
+    .form-section {
+      max-width: 640px;
+      margin: -40px auto 64px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .form-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .form-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .form-card .subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 28px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row > .form-group {
+      flex: 1;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+
+    .form-group label .required {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 15px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-group input.error,
+    .form-group select.error,
+    .form-group textarea.error {
+      border-color: var(--error);
+      background: var(--error-light);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .error-message {
+      font-size: 13px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ===== Success State ===== */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-state.show {
+      display: block;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--success-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+      color: var(--success);
+    }
+
+    .success-state h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .success-state p {
+      font-size: 15px;
+      color: var(--gray-500);
+      margin-bottom: 20px;
+    }
+
+    .success-state .submit-again {
+      display: inline-block;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .success-state .submit-again:hover {
+      background: #c7d9f5;
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100px);
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .toast.error {
+      background: var(--error);
+      color: #fff;
+    }
+
+    /* ===== Features ===== */
+    .features {
+      max-width: 960px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature {
+      text-align: center;
+      padding: 28px 20px;
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 22px;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 13px;
+      color: var(--gray-400);
+      border-top: 1px solid var(--gray-200);
+      background: #fff;
+    }
+
+    /* ===== Modal (View Leads) ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 40px;
+      overflow-y: auto;
+      padding-bottom: 40px;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 860px;
+      margin: auto 24px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--gray-100);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--gray-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .leads-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .leads-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      white-space: nowrap;
+    }
+
+    .leads-table td {
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--gray-700);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .leads-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .leads-table tr:hover {
+      background: var(--gray-50);
+    }
+
+    .modal-footer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-footer .count {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .refresh-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: #c7d9f5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--gray-400);
+    }
+
+    .empty-state p {
+      font-size: 15px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 16px; }
+      .form-card { padding: 24px; }
+      .form-row { flex-direction: column; gap: 0; }
+      .features { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">B</div>
+        <span>BizLink</span>
+      </div>
+      <a class="nav-link" id="viewLeadsBtn">查看提交记录</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <span class="hero-badge">企业合作 · B2B Partnership</span>
+    <h1>期待与您携手合作</h1>
+    <p>无论您在寻找技术伙伴、渠道资源还是市场合作，我们都期待与您深入交流。填写下方表单，我们会在 1-2 个工作日内与您联系。</p>
+  </section>
+
+  <!-- Form -->
+  <section class="form-section">
+    <div class="form-card">
+      <!-- Form State -->
+      <div id="formState">
+        <h2>合作意向登记</h2>
+        <p class="subtitle">标 <span style="color:#dc2626">*</span> 为必填项，请确保信息准确以便我们联系您。</p>
+
+        <form id="leadForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="company_name">公司名称 <span class="required">*</span></label>
+              <input type="text" id="company_name" name="company_name" placeholder="例如：腾讯科技有限公司" required>
+              <div class="error-message" id="error-company_name">请输入公司名称</div>
+            </div>
+            <div class="form-group">
+              <label for="contact_name">联系人 <span class="required">*</span></label>
+              <input type="text" id="contact_name" name="contact_name" placeholder="您的姓名" required>
+              <div class="error-message" id="error-contact_name">请输入联系人姓名</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">邮箱 <span class="required">*</span></label>
+              <input type="email" id="email" name="email" placeholder="name@company.com" required>
+              <div class="error-message" id="error-email">请输入有效的邮箱地址</div>
+            </div>
+            <div class="form-group">
+              <label for="phone">电话</label>
+              <input type="tel" id="phone" name="phone" placeholder="可选，如 138xxxx0000">
+              <div class="error-message" id="error-phone"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cooperation_type">合作类型</label>
+            <select id="cooperation_type" name="cooperation_type">
+              <option value="">请选择（可选）</option>
+              <option value="技术合作">技术合作</option>
+              <option value="市场合作">市场合作</option>
+              <option value="渠道合作">渠道合作</option>
+              <option value="资源合作">资源合作</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="note">备注</label>
+            <textarea id="note" name="note" placeholder="请简要描述合作意向或需求（可选）"></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span id="btnText">提交合作意向</span>
+            <span id="btnSpinner" style="display:none;"><span class="spinner"></span></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Success State -->
+      <div class="success-state" id="successState">
+        <div class="success-icon">&#10003;</div>
+        <h3>提交成功！</h3>
+        <p>感谢您的关注，我们已收到您的合作意向，会在 1-2 个工作日内与您联系。</p>
+        <button class="submit-again" onclick="resetForm()">再填一条</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="feature">
+      <div class="feature-icon" style="background:#dbeafe;color:#2563eb;">&#9881;</div>
+      <h3>技术驱动</h3>
+      <p>基于云原生架构，提供稳定可靠的合作体验</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#dcfce7;color:#16a34a;">&#10003;</div>
+      <h3>快速响应</h3>
+      <p>提交后 1-2 个工作日内专人对接，高效推进</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#fef3c7;color:#d97706;">&#9733;</div>
+      <h3>长期共赢</h3>
+      <p>建立互信互利的关系，共同探索商业机会</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 BizLink · 本页面用于 B2B 合作意向收集</p>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal: View Leads -->
+  <div class="modal-overlay" id="leadsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>已提交的合作意向</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="leadsTableBody">
+        <div class="empty-state"><span class="spinner"></span><p style="margin-top:12px">加载中...</p></div>
+      </div>
+      <div class="modal-footer">
+        <span class="count" id="leadsCount"></span>
+        <button class="refresh-btn" onclick="loadLeads()">刷新</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Supabase 配置 ======
+    const SUPABASE_URL = 'https://dszgkpcrczmuioznykrd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_bBgfjtETEQHmHLDb9UZinw_26LpMfCt';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ====== 表单提交 ======
+    const form = document.getElementById('leadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + type;
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function showFieldError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errorEl = document.getElementById('error-' + fieldId);
+      if (message) {
+        field.classList.add('error');
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+      } else {
+        field.classList.remove('error');
+        errorEl.classList.remove('show');
+      }
+    }
+
+    function validateForm(data) {
+      let valid = true;
+
+      if (!data.company_name || data.company_name.trim() === '') {
+        showFieldError('company_name', '请输入公司名称');
+        valid = false;
+      } else {
+        showFieldError('company_name', '');
+      }
+
+      if (!data.contact_name || data.contact_name.trim() === '') {
+        showFieldError('contact_name', '请输入联系人姓名');
+        valid = false;
+      } else {
+        showFieldError('contact_name', '');
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!data.email || data.email.trim() === '') {
+        showFieldError('email', '请输入邮箱地址');
+        valid = false;
+      } else if (!emailRegex.test(data.email)) {
+        showFieldError('email', '邮箱格式不正确');
+        valid = false;
+      } else {
+        showFieldError('email', '');
+      }
+
+      if (data.phone && data.phone.trim() !== '') {
+        const phoneRegex = /^[\d\s\-+()]{6,20}$/;
+        if (!phoneRegex.test(data.phone)) {
+          showFieldError('phone', '电话格式不正确');
+          valid = false;
+        } else {
+          showFieldError('phone', '');
+        }
+      } else {
+        showFieldError('phone', '');
+      }
+
+      return valid;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        company_name: document.getElementById('company_name').value.trim(),
+        contact_name: document.getElementById('contact_name').name.trim ? document.getElementById('contact_name').value.trim() : '',
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        cooperation_type: document.getElementById('cooperation_type').value,
+        note: document.getElementById('note').value.trim()
+      };
+
+      // Fix contact_name
+      data.contact_name = document.getElementById('contact_name').value.trim();
+
+      if (!validateForm(data)) {
+        showToast('请检查必填项', 'error');
+        return;
+      }
+
+      // 提交
+      submitBtn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline-block';
+
+      try {
+        const { data: result, error } = await supabase
+          .from('b2b_leads')
+          .insert([data])
+          .select();
+
+        if (error) {
+          throw error;
+        }
+
+        // 成功
+        document.getElementById('formState').style.display = 'none';
+        document.getElementById('successState').classList.add('show');
+        showToast('提交成功！', 'success');
+
+      } catch (err) {
+        console.error('Submit error:', err);
+        showToast('提交失败：' + (err.message || '未知错误'), 'error');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    });
+
+    function resetForm() {
+      form.reset();
+      document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+      document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('error'));
+      document.getElementById('formState').style.display = 'block';
+      document.getElementById('successState').classList.remove('show');
+    }
+
+    // ====== 查看提交记录 ======
+    const viewLeadsBtn = document.getElementById('viewLeadsBtn');
+    const leadsModal = document.getElementById('leadsModal');
+
+    viewLeadsBtn.addEventListener('click', () => {
+      leadsModal.classList.add('show');
+      loadLeads();
+    });
+
+    function closeModal() {
+      leadsModal.classList.remove('show');
+    }
+
+    leadsModal.addEventListener('click', (e) => {
+      if (e.target === leadsModal) closeModal();
+    });
+
+    async function loadLeads() {
+      const body = document.getElementById('leadsTableBody');
+      body.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:12px">加载中...</p></div>';
+
+      try {
+        const { data, error } = await supabase
+          .from('b2b_leads')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (error) throw error;
+
+        document.getElementById('leadsCount').textContent = '共 ' + data.length + ' 条记录';
+
+        if (data.length === 0) {
+          body.innerHTML = '<div class="empty-state"><p>暂无提交记录</p></div>';
+          return;
+        }
+
+        let html = '<table class="leads-table"><thead><tr>';
+        html += '<th>时间</th><th>公司</th><th>联系人</th><th>邮箱</th><th>电话</th><th>类型</th><th>备注</th>';
+        html += '</tr></thead><tbody>';
+
+        data.forEach(row => {
+          const time = row.created_at ? new Date(row.created_at).toLocaleString('zh-CN') : '-';
+          html += '<tr>';
+          html += '<td style="white-space:nowrap;font-size:12px;color:#9ca3af">' + time + '</td>';
+          html += '<td><strong>' + escapeHtml(row.company_name || '-') + '</strong></td>';
+          html += '<td>' + escapeHtml(row.contact_name || '-') + '</td>';
+          html += '<td>' + escapeHtml(row.email || '-') + '</td>';
+          html += '<td>' + escapeHtml(row.phone || '-') + '</td>';
+          html += '<td>' + escapeHtml(row.cooperation_type || '-') + '</td>';
+          html += '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(row.note || '-') + '</td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        body.innerHTML = html;
+
+      } catch (err) {
+        console.error('Load error:', err);
+        body.innerHTML = '<div class="empty-state"><p style="color:#dc2626">加载失败：' + escapeHtml(err.message) + '</p></div>';
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ESC 关闭弹窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>
